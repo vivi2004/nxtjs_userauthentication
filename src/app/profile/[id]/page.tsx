@@ -6,7 +6,7 @@ type UserProfileProps = {
   };
 };
 
-export default async function UserProfilePage({ params }: UserProfileProps) {
+export default function UserProfilePage({ params }: UserProfileProps) {
   if (!params?.id) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen py-2">
