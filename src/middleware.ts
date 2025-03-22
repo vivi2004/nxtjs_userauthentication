@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   
   // Define public paths.
-  const isPublicPath = path === '/login' || path === '/signup';
+  const isPublicPath = path === '/login' || path === '/signup'|| path === '/verifyemail'
   
   // Get the token from cookies.
   const token = request.cookies.get('token')?.value || '';
@@ -36,5 +36,7 @@ export const config = {
     '/profile',
     '/login',
     '/signup', // Fixed: now starts with '/'
+    '/verifyemail'
+
   ]
 };

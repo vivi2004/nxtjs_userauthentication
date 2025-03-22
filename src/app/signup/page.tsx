@@ -13,6 +13,8 @@ type User = {
 };
 
 
+
+
 export default function SignupPage() {
   const router = useRouter();
 
@@ -111,4 +113,6 @@ export default function SignupPage() {
       </Link>
     </div>
   );
-}
+}  
+
+  
