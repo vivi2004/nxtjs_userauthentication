@@ -1,42 +1,53 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
- 
-// This function can be marked `async` if using `await` inside
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   
-  // Define public paths.
-  const isPublicPath = path === '/login' || path === '/signup'|| path === '/verifyemail'
-  
-  // Get the token from cookies.
+  // Define public paths
+  const isPublicPath = [
+    '/login',
+    '/signup',
+    '/verifyemail',
+    '/forgot-password',
+    '/reset-password'
+  ].includes(path);
+
+  // Get the token from cookies
   const token = request.cookies.get('token')?.value || '';
 
-  // If the user is logged in (token exists) and is trying to access a public page,
-  // redirect them to the home page. 
-
+  // Redirect authenticated users from public pages
   if (isPublicPath && token) {
     return NextResponse.redirect(new URL('/', request.nextUrl));
   }
-   
-  // If the user is not logged in (no token) and tries to access a protected page,
-  // redirect them to the login page. 
 
+  // Protect non-public pages for unauthenticated users
   if (!isPublicPath && !token) {
     return NextResponse.redirect(new URL('/login', request.nextUrl));
   }
-  
-  // Otherwise, continue to the requested page.
+
+  // Special case for reset-password URL validation
+  if (path === '/reset-password') {
+    const tokenParam = request.nextUrl.searchParams.get('token');
+    const userId = request.nextUrl.searchParams.get('userId');
+    
+    if (!tokenParam || !userId) {
+      return NextResponse.redirect(new URL('/forgot-password', request.nextUrl));
+    }
+  }
+
   return NextResponse.next();
 }
-  
-// Updated matcher configuration: all paths start with a '/'
+
 export const config = {
   matcher: [
     '/',
     '/profile',
     '/login',
-    '/signup', // Fixed: now starts with '/'
-    '/verifyemail'
-
+    '/signup',
+    '/verifyemail',
+    '/forgot-password',
+    '/reset-password'
   ]
-};
+};   
+  
