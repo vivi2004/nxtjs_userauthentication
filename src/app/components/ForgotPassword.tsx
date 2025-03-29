@@ -1,7 +1,7 @@
-// app/components/ForgotPasswordForm.tsx
 "use client";
 
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -10,6 +10,11 @@ export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,43 +33,74 @@ export default function ForgotPasswordForm() {
     }
   };
 
+  if (!isMounted) return null;
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1 className="text-2xl mb-4">{loading ? "Processing..." : "Reset Password"}</h1>
-      
-      {!emailSent ? (
-        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 px-4">
-          <div>
-            <label htmlFor="email" className="block mb-2">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded-lg"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            {loading ? "Sending..." : "Send Reset Link"}
-          </button>
-        </form>
-      ) : (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <p className="text-green-600 mb-4">Check your email for reset instructions</p>
-          <Link href="/login" className="text-blue-600 hover:underline">
-            Back to Login
-          </Link>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            {loading ? "Sending Email..." : "Reset Password"}
+          </h1>
         </div>
-      )}
+
+        {!emailSent ? (
+          <div className="bg-white rounded-lg shadow-xl p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-colors ${
+                  loading 
+                    ? "bg-gray-400 cursor-not-allowed" 
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+              >
+                {loading ? "Sending..." : "Send Reset Link"}
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-xl p-8 text-center">
+            <div className="text-green-600 mb-6">
+              <svg 
+                className="w-12 h-12 mx-auto" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M5 13l4 4L19 7" 
+                />
+              </svg>
+              <p className="mt-4 text-lg font-medium">Check your email for reset instructions</p>
+            </div>
+            <Link 
+              href="/login" 
+              className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+            >
+              Return to Login
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-
-
-

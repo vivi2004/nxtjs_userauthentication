@@ -66,4 +66,4 @@ export default function ForgotPasswordPage() {
       <div className="fixed bottom-1/4 left-1/4 w-96 h-96 bg-pink-100 rounded-full opacity-50 mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
     </div>
   );
-}
+}  

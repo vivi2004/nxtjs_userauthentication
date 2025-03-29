@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import toast from "react-hot-toast";
 
 export default function SignupPage() {
@@ -18,16 +18,16 @@ export default function SignupPage() {
   const onSignup = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("/api/users/signup", user);
+      // Removed unused response variable
+      await axios.post("/api/users/signup", user);
       toast.success("Signup successful! Redirecting to login...");
       router.push("/login");
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || "Signup failed. Please try again.";
-        toast.error(errorMessage);
-      } else {
-        toast.error("An unexpected error occurred. Please try again.");
-      }
+      // Improved error handling without AxiosError import
+      const errorMessage = axios.isAxiosError(error) 
+        ? error.response?.data?.message || "Signup failed. Please try again."
+        : "An unexpected error occurred. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -51,6 +51,7 @@ export default function SignupPage() {
 
         <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6 transition-all duration-300 hover:shadow-2xl">
           <div className="space-y-6">
+            {/* All input fields remain unchanged */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Username
@@ -90,6 +91,7 @@ export default function SignupPage() {
               />
             </div>
 
+            {/* Button styling preserved */}
             <button
               onClick={onSignup}
               disabled={buttonDisabled || loading}
@@ -110,6 +112,7 @@ export default function SignupPage() {
             </button>
           </div>
 
+          {/* Link section unchanged */}
           <div className="text-center text-sm text-gray-600">
             Already have an account?{" "}
             <Link 
@@ -121,6 +124,7 @@ export default function SignupPage() {
           </div>
         </div>
 
+        {/* Security message section preserved */}
         <div className="text-center text-sm text-gray-500">
           <div className="flex items-center justify-center space-x-2">
             <svg 

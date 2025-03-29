@@ -14,14 +14,16 @@ export default function LoginPage() {
     const onLogin = async () => {
         try {
             setLoading(true);
-            const response = await axios.post("/api/users/login", user);
+            await axios.post("/api/users/login", user);
             toast.success("Login successful!");
             router.push("/profile");
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Login failed");
-        } finally {
-            setLoading(false);
-        }
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+              toast.error(error.response?.data?.message || "Login failed");
+            } else {
+              toast.error("An unexpected error occurred");
+            }
+          }
     };
 
     useEffect(() => {
@@ -97,7 +99,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="text-center text-sm text-gray-600">
-                        Don't have an account?{" "}
+                        Don&apos;t have an account?{" "}
                         <Link 
                             href="/signup" 
                             className="font-medium text-blue-600 hover:text-blue-500"

@@ -38,10 +38,16 @@ export async function POST(request: Request) {
       message: "Token is valid"
     });
 
-  } catch (error: any) {
-    return NextResponse.json(
-      { message: error.message || "Server error" },
-      { status: 500 }
-    );
-  }
+  } catch (error: unknown) {
+    let errorMessage = "Server error";
+    
+    // Type guard to safely access error message
+    if (error instanceof Error) {
+        errorMessage = error.message;
     }
+    
+    return NextResponse.json(
+        { message: errorMessage },
+        { status: 500 }
+    );
+}   

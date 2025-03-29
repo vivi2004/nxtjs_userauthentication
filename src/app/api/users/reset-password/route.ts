@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 export async function POST(request: Request) {
   try {
     const { userId, token, password } = await request.json();
-    
+
     const user = await User.findById(userId);
     if (!user) {
       return NextResponse.json(
@@ -36,9 +36,15 @@ export async function POST(request: Request) {
       message: "Password reset successful"
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
-      { message: error.message },
+      { message: "An unknown error occurred" },
       { status: 500 }
     );
   }

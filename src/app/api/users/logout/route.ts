@@ -8,8 +8,7 @@ export async function GET() {
                 success: true, 
             }
         );
-        
-        // Set cookie on the response you created
+
         response.cookies.set("token", "", {
             httpOnly: true,
             expires: new Date(0)
@@ -17,9 +16,9 @@ export async function GET() {
 
         return response;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return NextResponse.json(
-            { error: error.message },
+            { error: error instanceof Error ? error.message : 'An unknown error occurred' },
             { status: 500 }
         );
     }
