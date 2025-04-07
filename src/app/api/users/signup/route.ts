@@ -1,30 +1,24 @@
+// src/app/api/users/signup/route.ts
 import { connect } from "@/dbconfig/dbConfig";
-import User from "@/app/models/UserModel.js";
+import User from "@/app/models/UserModel";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
-import { sendEmail } from "@/app/helper/mailer";
-// import { sendEmail } from "@/helpers/mailer";
+
+connect();
+
+// Define the shape of the incoming JSON
+interface SignupRequestBody {
+  username: string;
+  email: string;
+  password: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    // Ensure the database is connected before proceeding.
-    await connect();
+    // cast the JSON to our interface so no more `any`
+    const { username, email, password } = (await request.json()) as SignupRequestBody;
 
-    // Parse the incoming JSON body.
-    const reqBody = await request.json();
-    const { username, email, password } = reqBody;
-
-    // Basic input validation
-    if (!username || !email || !password) {
-      return NextResponse.json(
-        { error: "Missing required fields: username, email, or password." },
-        { status: 400 }
-      );
-    }
-
-    console.log("Request body:", reqBody);
-
-    // Check if a user with the provided email already exists.
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -33,38 +27,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash the password.
+    // Hash password
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
-    // Create a new user instance.
+    // Create new user
     const newUser = new User({
       username,
       email,
-      password: hashedPassword,
+      password: hashedPassword
     });
 
-    // Save the new user to the database.
     const savedUser = await newUser.save();
-    console.log("Saved user:", savedUser);
-      // Send verification email..
-       await sendEmail({email, emailType: "VERIFY" , 
-         userId: savedUser._id })
-      
 
-    // (Optional) Send verification email.
-    // await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id });
-
-    // Return a successful response. 
-    
     return NextResponse.json({
       message: "User created successfully",
       success: true,
-      savedUser,
+      savedUser, // ideally you’d strip out sensitive fields here
     });
-  } catch (error: any) {
-    console.error("Signup error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+  } catch (err: unknown) {
+    let errorMessage = "Server error";
+    if (err instanceof Error) errorMessage = err.message;
+    return NextResponse.json(
+      { error: errorMessage },
+      { status: 500 }
+    );
   }
 }
-

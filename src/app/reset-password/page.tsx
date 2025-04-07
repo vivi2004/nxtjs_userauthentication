@@ -1,56 +1,64 @@
+// src/app/components/ResetPasswordForm.tsx
 "use client";
-import ResetPasswordForm from "@/app/components/ResetPassword";
 
-export default function ResetPasswordPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full mx-auto space-y-8">
-        {/* Header Section */}
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Set New Password
-          </h1>
-          <p className="text-gray-600 mt-3">
-            Enter your new password below
-          </p>
-        </div>
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import axios from "axios";
+import toast from "react-hot-toast";
 
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6 relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
-          {/* Decorative Gradient Border */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl blur opacity-20"></div>
-          
-          {/* Form Container */}
-          <div className="relative space-y-6">
-            <ResetPasswordForm />
-          </div>
-        </div>
+export default function ResetPasswordForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("userId") ?? "";
+  const token = searchParams.get("token") ?? "";
 
-        {/* Security Assurance */}
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            <svg 
-              className="inline-block w-4 h-4 mr-1 text-green-500" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            Your password is securely encrypted
-          </p>
-        </div>
+  const [valid, setValid] = useState<boolean | null>(null);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!userId || !token) return router.replace("/login");
+    axios
+      .post("/api/users/verify-reset-token", { userId, token })
+      .then(() => setValid(true))
+      .catch(() => {
+        toast.error("Invalid or expired link");
+        router.replace("/login");
+      });
+  }, [userId, token, router]);
+
+  if (valid === null) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
       </div>
+    );
+  }
 
-      {/* Animated Background Elements */}
-      <div className="fixed top-1/3 -right-32 w-96 h-96 bg-purple-100 rounded-full opacity-50 mix-blend-multiply filter blur-xl animate-blob"></div>
-      <div className="fixed top-1/2 -left-32 w-96 h-96 bg-blue-100 rounded-full opacity-50 mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-      <div className="fixed bottom-1/4 left-1/4 w-96 h-96 bg-pink-100 rounded-full opacity-50 mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
-    </div>
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirm) return toast.error("Passwords don't match");
+
+    setLoading(true);
+    try {
+      const { data } = await axios.post("/api/users/reset-password", {
+        userId,
+        token,
+        password,
+      });
+      toast.success(data.message || "Password reset!");
+      router.push("/login");
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Reset failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      {/* ...your inputs and button here... */}
+    </form>
   );
 }

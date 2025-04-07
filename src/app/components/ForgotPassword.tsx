@@ -19,19 +19,24 @@ export default function ForgotPasswordForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       const response = await axios.post("/api/users/forgot-password", { email });
       if (response.data.success) {
         toast.success("Password reset email sent!");
         setEmailSent(true);
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Error sending reset email");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data?.message || "Error sending reset email");
+      } else {
+        toast.error("Error sending reset email");
+      }
     } finally {
       setLoading(false);
     }
   };
+
 
   if (!isMounted) return null;
 
@@ -64,11 +69,10 @@ export default function ForgotPasswordForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-colors ${
-                  loading 
-                    ? "bg-gray-400 cursor-not-allowed" 
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-colors ${loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+                  }`}
               >
                 {loading ? "Sending..." : "Send Reset Link"}
               </button>
@@ -77,23 +81,23 @@ export default function ForgotPasswordForm() {
         ) : (
           <div className="bg-white rounded-lg shadow-xl p-8 text-center">
             <div className="text-green-600 mb-6">
-              <svg 
-                className="w-12 h-12 mx-auto" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="w-12 h-12 mx-auto"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M5 13l4 4L19 7" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
                 />
               </svg>
               <p className="mt-4 text-lg font-medium">Check your email for reset instructions</p>
             </div>
-            <Link 
-              href="/login" 
+            <Link
+              href="/login"
               className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
             >
               Return to Login

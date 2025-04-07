@@ -23,7 +23,7 @@ export default function UserProfilePage({ params }: UserProfileProps) {
       <h1>Profile</h1>
       <hr />
       <p className="text-4xl">
-        Profile page: 
+        Profile page:
         <span className="p-1 rounded bg-lime-600 text-black">{params.id}</span>
       </p>
     </div>

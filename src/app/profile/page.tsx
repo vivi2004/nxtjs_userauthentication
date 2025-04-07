@@ -3,11 +3,17 @@ import axios, { AxiosError } from "axios";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Added useEffect
 
 export default function ProfilePage() {
     const router = useRouter();
     const [data, setData] = useState<string>("nothing");
+    const [loading, setLoading] = useState(true); // Added loading state
+
+    // Add useEffect to check auth status on mount
+    useEffect(() => {
+        getUserDetails();
+    }, []);
 
     const logout = async () => {
         try {
@@ -21,7 +27,6 @@ export default function ProfilePage() {
             } else if (error instanceof Error) {
                 errorMessage = error.message;
             }
-            console.error(errorMessage);
             toast.error(errorMessage);
         }
     };
@@ -31,16 +36,21 @@ export default function ProfilePage() {
             const res = await axios.get('/api/users/me');
             setData(res.data.data._id);
         } catch (error: unknown) {
-            let errorMessage = "Failed to fetch user details";
-            if (error instanceof AxiosError) {
-                errorMessage = error.response?.data?.message || error.message;
-            } else if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            console.error(errorMessage);
-            toast.error(errorMessage);
+            router.push('/login'); // Redirect to login if unauthorized
+            toast.error("Please login to access this page");
+        } finally {
+            setLoading(false); // Update loading state
         }
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -84,7 +94,7 @@ export default function ProfilePage() {
                             >
                                 Get User Details
                             </button>
-                            
+
                             <button
                                 onClick={logout}
                                 className="w-full py-3 px-4 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-all shadow-lg hover:shadow-xl"
@@ -96,8 +106,8 @@ export default function ProfilePage() {
 
                     <div className="text-center text-sm text-gray-600">
                         Need help?{" "}
-                        <Link 
-                            href="/support" 
+                        <Link
+                            href="/support"
                             className="font-medium text-blue-600 hover:text-blue-500"
                         >
                             Contact support
@@ -107,16 +117,16 @@ export default function ProfilePage() {
 
                 <div className="text-center text-sm text-gray-500">
                     <div className="flex items-center justify-center space-x-2">
-                        <svg 
-                            className="w-4 h-4 text-green-500" 
-                            fill="none" 
-                            stroke="currentColor" 
+                        <svg
+                            className="w-4 h-4 text-green-500"
+                            fill="none"
+                            stroke="currentColor"
                             viewBox="0 0 24 24"
                         >
-                            <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2} 
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                         </svg>
@@ -127,3 +137,6 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+
+
